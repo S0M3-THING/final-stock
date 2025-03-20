@@ -7,16 +7,16 @@ import gunicorn
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-# Load models
+
 resnet_model = load_resnet()
 clip_model, clip_preprocess, clip_device = load_clip()
 
-# Define reference images
+
 root_dir = "./cheatsheet"
 database_images = list(buy_sell_mapping.keys())
 database_paths = [os.path.join(root_dir, img) for img in database_images]
 
-# Extract features once and store
+
 database_features_resnet = np.array([extract_features_resnet(resnet_model, img) for img in database_paths])
 database_features_clip = np.array([extract_features_clip(clip_model, clip_preprocess, clip_device, img) for img in database_paths])
 
@@ -37,11 +37,11 @@ def analyze():
     image_path = "uploaded_image.jpg"
     image.save(image_path)
 
-    # Extract features
+
     input_features_resnet = extract_features_resnet(resnet_model, image_path)
     input_features_clip = extract_features_clip(clip_model, clip_preprocess, clip_device, image_path)
 
-    # Compare with database
+
     similarities_resnet = cosine_similarity([input_features_resnet], database_features_resnet)
     closest_resnet_idx = np.argmax(similarities_resnet)
     resnet_match = database_images[closest_resnet_idx]
@@ -52,15 +52,15 @@ def analyze():
     clip_match = database_images[closest_clip_idx]
     confidence_clip = float(similarities_clip[0, closest_clip_idx] * 100)
 
-    # Determine buy/sell decisions
+
     resnet_decision = buy_sell_mapping[resnet_match]
     clip_decision = buy_sell_mapping[clip_match]
 
-    # Final decision logic
+
     if resnet_decision == clip_decision:
-        final_decision = resnet_decision  # If both agree, use that decision
+        final_decision = resnet_decision 
     else:
-        final_decision = "uncertain"  # If they disagree, say "uncertain"
+        final_decision = "uncertain"  
 
     return jsonify({
         "resnet_match": resnet_match,

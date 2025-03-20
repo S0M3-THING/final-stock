@@ -4,29 +4,29 @@ from torchvision import models, transforms
 from PIL import Image
 import numpy as np
 
-# Define the mapping of images to "buy" or "sell"
+# Add to the mapping when adding pictures
 buy_sell_mapping = {
     "AT.jpg": "buy", "CAH.jpg": "buy", "DBW.jpg": "buy", "DT.jpg": "sell", "DTM.jpg": "sell", "FF.jpg": "buy",
     "BB.jpg": "buy", "BT.jpg": "sell", "TB.jpg": "buy", "TT.jpg": "sell", "RB.jpg": "buy", "RT.jpg": "sell", "HAS.jpg": "sell", "IHAS.jpg": "buy",
     "FP.jpg": "buy", "FW.jpg": "buy", "ICAH.jpg": "sell", "RF.jpg": "sell", "RP.jpg": "sell", "RW.jpg": "sell"
 }
 
-# Load ResNet model
+
 def load_resnet():
-    model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)  # Fix for warning
-    model = torch.nn.Sequential(*list(model.children())[:-1])  # Remove last layer
+    model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1) 
+    model = torch.nn.Sequential(*list(model.children())[:-1]) 
     model.eval()
     return model
 
 
-# Load CLIP model
+
 def load_clip():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load("ViT-B/32", device=device)
     model.eval()
     return model, preprocess, device
 
-# Extract features using ResNet
+
 def extract_features_resnet(model, image_path):
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -39,7 +39,7 @@ def extract_features_resnet(model, image_path):
         features = model(image)
     return features.numpy().flatten()
 
-# Extract features using CLIP
+
 def extract_features_clip(model, preprocess, device, image_path):
     image = Image.open(image_path).convert("RGB")
     image = preprocess(image).unsqueeze(0).to(device)
