@@ -16,7 +16,6 @@ root_dir = "./cheatsheet"
 database_images = list(buy_sell_mapping.keys())
 database_paths = [os.path.join(root_dir, img) for img in database_images]
 
-
 database_features_resnet = np.array([extract_features_resnet(resnet_model, img) for img in database_paths])
 database_features_clip = np.array([extract_features_clip(clip_model, clip_preprocess, clip_device, img) for img in database_paths])
 
@@ -56,11 +55,7 @@ def analyze():
     resnet_decision = buy_sell_mapping[resnet_match]
     clip_decision = buy_sell_mapping[clip_match]
 
-
-    if resnet_decision == clip_decision:
-        final_decision = resnet_decision 
-    else:
-        final_decision = "uncertain"  
+    final_decision = resnet_decision if resnet_decision == clip_decision else "uncertain"
 
     return jsonify({
         "resnet_match": resnet_match,
