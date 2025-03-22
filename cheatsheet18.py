@@ -1,8 +1,10 @@
+#
+
 import torch
-import clip
 from torchvision import models, transforms
 from PIL import Image
 import numpy as np
+from huggingface_hub import hf_hub_download
 
 
 buy_sell_mapping = {
@@ -11,21 +13,11 @@ buy_sell_mapping = {
     "FP.jpg": "buy", "FW.jpg": "buy", "ICAH.jpg": "sell", "RF.jpg": "sell", "RP.jpg": "sell", "RW.jpg": "sell"
 }
 
-
 def load_resnet():
-    model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)  
+    model = models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1)  
     model = torch.nn.Sequential(*list(model.children())[:-1])  
     model.eval()
     return model
-
-
-
-def load_clip():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, preprocess = clip.load("ViT-B/32", device=device)
-    model.eval()
-    return model, preprocess, device
-
 
 def extract_features_resnet(model, image_path):
     transform = transforms.Compose([
@@ -38,11 +30,3 @@ def extract_features_resnet(model, image_path):
     with torch.no_grad():
         features = model(image)
     return features.numpy().flatten()
-
-
-def extract_features_clip(model, preprocess, device, image_path):
-    image = Image.open(image_path).convert("RGB")
-    image = preprocess(image).unsqueeze(0).to(device)
-    with torch.no_grad():
-        features = model.encode_image(image)
-    return features.cpu().numpy().flatten()
